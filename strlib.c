@@ -86,10 +86,19 @@
  */
 const char *str_find_char(const char *s, char c)
 {
-    (void)s;   /* remove these (void) lines once you use the parameters */
-    (void)c;
+    const char *p = s;
 
-    /* TODO */
+    while (*p != '\0') {
+        if (*p == c) {
+            return p;
+        }
+        p++;
+    }
+
+    if (c == '\0') {
+        return p;
+    }
+
     return NULL;
 }
 
@@ -117,9 +126,27 @@ const char *str_find_char(const char *s, char c)
  */
 void str_reverse(char *s)
 {
-    (void)s;
+    char *left = s;
+    char *right = s;
 
-    /* TODO */
+    while (*right != '\0') {
+        right++;
+    }
+
+    if (right == s) {
+        return;
+    }
+
+    right--;
+
+    while (left < right) {
+        char temp = *left;
+        *left = *right;
+        *right = temp;
+
+        left++;
+        right--;
+    }
 }
 
 
@@ -149,11 +176,39 @@ void str_reverse(char *s)
  */
 int str_compare_ci(const char *a, const char *b)
 {
-    (void)a;
-    (void)b;
+        while (*a != '\0' && *b != '\0') {
+        char ca = *a;
+        char cb = *b;
 
-    /* TODO */
-    return 0;
+        if (ca >= 'A' && ca <= 'Z') {
+            ca = ca + ('a' - 'A');
+        }
+
+        if (cb >= 'A' && cb <= 'Z') {
+            cb = cb + ('a' - 'A');
+        }
+
+        if (ca < cb) {
+            return -1;
+        }
+
+        if (ca > cb) {
+            return 1;
+        }
+
+        a++;
+        b++;
+    }
+
+    if (*a == '\0' && *b == '\0') {
+        return 0;
+    }
+
+    if (*a == '\0') {
+        return -1;
+    }
+
+    return 1;
 }
 
 
@@ -187,12 +242,26 @@ int str_compare_ci(const char *a, const char *b)
  */
 size_t str_copy_bounded(char *dst, const char *src, size_t size)
 {
-    (void)dst;
-    (void)src;
-    (void)size;
+        size_t length = 0;
 
-    /* TODO */
-    return 0;
+    while (src[length] != '\0') {
+        length++;
+    }
+
+    if (size == 0) {
+        return length;
+    }
+
+    size_t i = 0;
+
+    while (i < length && i < size - 1) {
+        dst[i] = src[i];
+        i++;
+    }
+
+    dst[i] = '\0';
+
+    return length;
 }
 
 
@@ -221,12 +290,36 @@ size_t str_copy_bounded(char *dst, const char *src, size_t size)
  *   How I tested it:
  *
  */
+
+static int matches_at(const char *p, const char *needle)
+{
+    while (*needle != '\0') {
+        if (*p == '\0' || *p != *needle) {
+            return 0;
+        }
+
+        p++;
+        needle++;
+    }
+
+    return 1;
+
+    }
 const char *str_find_sub(const char *hay, const char *needle)
 {
-    (void)hay;
-    (void)needle;
+    if (*needle == '\0') {
+        return hay;
+    }
+    const char *p = hay;
 
-    /* TODO */
+    while (*p != '\0') {
+        if (matches_at(p, needle)) {
+            return p;
+        }
+
+        p++;
+    }
+
     return NULL;
 }
 
@@ -256,13 +349,44 @@ const char *str_find_sub(const char *hay, const char *needle)
  *   How I tested it:
  *
  */
-size_t str_squeeze(char *s)
-{
-    (void)s;
 
-    /* TODO */
-    return 0;
+size_t str_squeeze(char *s)
+ {
+    if (s == NULL) return 0;
+
+    size_t r = 0; // read index
+    size_t w = 0; // write index
+
+    // 1. Skip all leading whitespace
+  while (s[r] == ' ' || s[r] == '\t') {
+        r++;
+    }
+
+    // 2. Process the middle of the string
+    while (s[r] != '\0') {
+     if (s[r] == ' ' || s[r] == '\t') {
+            // When we hit whitespace, write a single space...
+            s[w++] = ' ';
+            // ...and skip all consecutive whitespace characters
+          while (s[r] == ' ' || s[r] == '\t') {
+                r++;
+            }
+        } else {
+            // Copy normal characters
+            s[w++] = s[r++];
+        }
+    }
+
+    // 3. Remove any trailing space left at the end
+    if (w > 0 && s[w - 1] == ' ') {
+        w--;
+    }
+
+    // Null-terminate the modified string and return its new length
+    s[w] = '\0';
+    return w;
 }
+
 
 
 /* ============================================================================
@@ -296,13 +420,30 @@ size_t str_squeeze(char *s)
  */
 int str_split(char *s, char delim, char *fields[], int max_fields)
 {
-    (void)s;
-    (void)delim;
-    (void)fields;
-    (void)max_fields;
+      int count = 0;
+    char *start = s;
+    char *p = s;
 
-    /* TODO */
-    return 0;
+    while (1) {
+        if (*p == delim || *p == '\0') {
+            if (count < max_fields) {
+                fields[count] = start;
+            }
+
+            count++;
+
+            if (*p == '\0') {
+                break;
+            }
+
+            *p = '\0';
+            start = p + 1;
+        }
+
+        p++;
+    }
+
+   return count;
 }
 
 
@@ -339,6 +480,9 @@ int main(void)
 
     /* 5. str_find_sub */
     const char *hay = "aaab";
+{
+    
+}
     const char *found = str_find_sub(hay, "aab");
     if (found != NULL)
         printf("find_sub: offset %d (expected 1)\n", (int)(found - hay));
